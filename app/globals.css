@@ -1,26 +1,78 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-primary);
+  --font-mono: var(--font-secondary);
+  /* Using standard mono for code */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  /* Valorant Palette */
+  --background: #0f1923;
+  --foreground: #ece8e1;
+
+  --primary: #ff4655;
+  /* Valorant Red */
+  --primary-foreground: #ffffff;
+
+  --secondary: #ece8e1;
+  --secondary-foreground: #0f1923;
+
+  --accent: #ff4655;
+  --accent-foreground: #ffffff;
+
+  --muted: #8b9bb4;
+  /* Blue-grayish muted text */
+  --muted-foreground: #5b6a78;
+
+  --card: #1f2731;
+  /* Slightly lighter panel bg */
+  --card-foreground: #ece8e1;
+
+  --border: #364152;
+  /* Subtle borders */
+  --input: #29343d;
+  --ring: #ff4655;
+
+  --font-primary: 'Tungsten', 'Arial', sans-serif;
+  /* Fallback to Arial if Tungsten not loaded */
+  --font-secondary: 'DIN Next', 'Courier New', monospace;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: sans-serif;
+  /* Default, overridden by classes */
+  overflow-x: hidden;
+  letter-spacing: 0.05em;
+}
+
+@layer utilities {
+  .val-card {
+    background: #111;
+    /* fallback */
+    background: linear-gradient(135deg, rgba(31, 39, 49, 0.9) 0%, rgba(31, 39, 49, 0.95) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+  }
+
+  /* Corner accents common in Valorant UI */
+  .val-corner-tl {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 6px;
+    height: 6px;
+    border-top: 2px solid var(--primary);
+    border-left: 2px solid var(--primary);
+  }
+
+  .val-heading {
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
 }
