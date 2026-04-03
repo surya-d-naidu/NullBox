@@ -1,4 +1,5 @@
 import Docker from 'dockerode';
+import { isSafeDockerContainerId, isSafeDockerImageReference, isValidPort } from '@/lib/validation';
 
 // Default to local socket, or env var if provided
 const docker = new Docker({ socketPath: '/var/run/docker.sock' });
@@ -7,11 +8,18 @@ export default docker;
 
 /**
  * Starts a container for a given challenge.
- * @param imageName The Docker image name to run
+ * Uses Docker Engine API only (no shell). Image name and port are validated before use.
+ * @param imageName The Docker image name to run (allowlisted format only)
  * @param internalPort The internal port the service listens on (e.g., 80, 1337)
  * @returns Object containing containerId and the assigned hostPort
  */
 export async function startChallengeContainer(imageName: string, internalPort: number) {
+    if (!isSafeDockerImageReference(imageName)) {
+        throw new Error('Invalid or disallowed Docker image reference');
+    }
+    if (!isValidPort(internalPort)) {
+        throw new Error('Invalid internal port');
+    }
     try {
         // Ensure image exists? For now assume it does or Docker will error (or pull if configured)
         // To be safe, we might want to try pulling, but let's keep it simple.
@@ -54,6 +62,10 @@ export async function startChallengeContainer(imageName: string, internalPort: n
 }
 
 export async function stopContainer(containerId: string) {
+    if (!isSafeDockerContainerId(containerId)) {
+        console.error('Rejected unsafe container id format');
+        return;
+    }
     try {
         const container = docker.getContainer(containerId);
         await container.stop();

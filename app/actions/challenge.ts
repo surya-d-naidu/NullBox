@@ -4,13 +4,14 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { startChallengeContainer, stopContainer } from '@/lib/docker';
 import { revalidatePath } from 'next/cache';
+import { isSafeRecordId, limits, sanitizePlainText } from '@/lib/validation';
 
 export async function startChallenge(prevState: any, formData: FormData) {
     const session = await getSession();
     if (!session) return { error: "Unauthorized" };
 
-    const challengeId = formData.get('challengeId') as string;
-    if (!challengeId) return { error: "Challenge ID required" };
+    const challengeId = String(formData.get('challengeId') ?? '');
+    if (!challengeId || !isSafeRecordId(challengeId)) return { error: "Challenge ID required" };
 
     const user = await prisma.user.findUnique({
         where: { id: session.userId },
@@ -69,10 +70,11 @@ export async function submitFlag(prevState: any, formData: FormData) {
     const session = await getSession();
     if (!session) return { error: "Unauthorized" };
 
-    const challengeId = formData.get('challengeId') as string;
-    const flag = formData.get('flag') as string;
+    const challengeId = String(formData.get('challengeId') ?? '');
+    const flag = sanitizePlainText(String(formData.get('flag') ?? ''), limits.maxFlagLen);
 
-    if (!challengeId || !flag) return { error: "Missing challenge ID or flag" };
+    if (!challengeId || !isSafeRecordId(challengeId)) return { error: "Missing challenge ID or flag" };
+    if (!flag) return { error: "Missing challenge ID or flag" };
 
     const user = await prisma.user.findUnique({
         where: { id: session.userId },
@@ -125,8 +127,8 @@ export async function stopChallenge(prevState: any, formData: FormData) {
     const session = await getSession();
     if (!session) return { error: "Unauthorized" };
 
-    const challengeId = formData.get('challengeId') as string;
-    if (!challengeId) return { error: "Challenge ID required" };
+    const challengeId = String(formData.get('challengeId') ?? '');
+    if (!challengeId || !isSafeRecordId(challengeId)) return { error: "Challenge ID required" };
 
     const user = await prisma.user.findUnique({
         where: { id: session.userId },
